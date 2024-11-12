@@ -150,6 +150,7 @@ function ExcelUploader() {
               render: response.data.headers.message,
               type: "error",
               isLoading: false,
+              autoClose: 5003,
             });
             isSuccess = false;
             setIsLoading(false);
@@ -166,6 +167,7 @@ function ExcelUploader() {
             render: err.code,
             type: "error",
             isLoading: false,
+            autoClose: 5003,
           });
           setIsLoading(false);
           break;
@@ -176,6 +178,7 @@ function ExcelUploader() {
         toast.update(toastLoading, {
           render: `Success Log price ${symbol} to elastic`,
           type: "success",
+          autoClose: 5003,
           isLoading: false,
         });
         setIsLoading(false);
@@ -185,6 +188,9 @@ function ExcelUploader() {
   };
 
   const handleSubmitChart = async () => {
+    const toastLoading = toast.loading(
+      `Process Logging Chart for Symbol ${symbol}`
+    );
     try {
       if (!token) {
         toast.error("Token cannot be empty!");
@@ -219,7 +225,12 @@ function ExcelUploader() {
           }
         );
         if (data.headers.statusCode !== 200) {
-          toast.error(data.headers.message);
+          toast.update(toastLoading, {
+            render: data.headers.message,
+            type: "error",
+            isLoading: false,
+            autoClose: 5003,
+          });
           setIsLoading(false);
           break;
         } else {
@@ -230,15 +241,24 @@ function ExcelUploader() {
             dataRequest.keyRedis = data.data.keyRedis;
           } else {
             setIsLoading(false);
-            toast.success(
-              `${data.headers.message}, Price Found: ${data.data.priceFound}`
-            );
+            toast.update(toastLoading, {
+              render: `${data.headers.message}, Price Found: ${data.data.priceFound}`,
+              type: "success",
+              isLoading: false,
+              autoClose: 5003,
+            });
+
             break;
           }
         }
       }
     } catch (error) {
-      toast.error(error.code);
+      toast.update(toastLoading, {
+        render: error.code,
+        type: "error",
+        isLoading: false,
+        autoClose: 5003,
+      });
       setIsLoading(false);
     }
   };
