@@ -371,7 +371,7 @@ function ExcelUploader() {
             placeholder="Input Time From (HH:mm:ss)"
             value={timeFrom}
             onChange={(e) => {
-              setFrom(e.target.value);
+              setTimeFrom(e.target.value);
             }}
           />
         </div>
@@ -397,7 +397,7 @@ function ExcelUploader() {
             placeholder="Input Time To (HH:mm:ss)"
             value={timeTo}
             onChange={(e) => {
-              setTo(e.target.value);
+              setTimeTo(e.target.value);
             }}
           />
         </div>
