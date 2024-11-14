@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
+import "./App.css";
 import "./index.css";
 import ExcelUploader from "./UploadExcel.jsx";
 import { ToastContainer } from "react-toastify";
