@@ -163,7 +163,7 @@ function ExcelUploader() {
               render: response.data.headers.message,
               type: "error",
               isLoading: false,
-              autoClose: 5003,
+              closeOnClick: true,
             });
             isSuccess = false;
             setIsLoading(false);
@@ -173,6 +173,12 @@ function ExcelUploader() {
             hprice = data.hprice;
             lprice = data.lprice;
             isSuccess = true;
+
+            const percentage = Math.floor((x / countRequest) * 100);
+            toast.update(toastLoading, {
+              render: `Symbol ${symbol} Generating Price ${percentage}%`,
+              type: "info",
+            });
             await delay(500);
           }
         } catch (err) {
@@ -180,7 +186,7 @@ function ExcelUploader() {
             render: err.code,
             type: "error",
             isLoading: false,
-            autoClose: 5003,
+            closeOnClick: true,
           });
           setIsLoading(false);
           break;
@@ -191,7 +197,7 @@ function ExcelUploader() {
         toast.update(toastLoading, {
           render: `Success Log price ${symbol} to elastic`,
           type: "success",
-          autoClose: 5003,
+          closeOnClick: true,
           isLoading: false,
         });
         setIsLoading(false);
@@ -245,7 +251,7 @@ function ExcelUploader() {
             render: data.headers.message,
             type: "error",
             isLoading: false,
-            autoClose: 5003,
+            closeOnClick: true,
           });
           setIsLoading(false);
           break;
@@ -255,13 +261,22 @@ function ExcelUploader() {
             dataRequest.totalLoop = data.data.totalLoop;
             dataRequest.lastDocument = data.data.lastDocument;
             dataRequest.keyRedis = data.data.keyRedis;
+
+            const percentage = Math.floor(
+              (data.data.stepPriceLog / data.data.totalLoop) * 100
+            );
+            toast.update(toastLoading, {
+              render: `Generating Chart ${percentage}%`,
+              type: "info",
+              isLoading: true,
+            });
           } else {
             setIsLoading(false);
             toast.update(toastLoading, {
               render: `${data.headers.message}, Price Found: ${data.data.priceFound}`,
               type: "success",
               isLoading: false,
-              autoClose: 5003,
+              closeOnClick: true,
             });
 
             break;
@@ -273,7 +288,7 @@ function ExcelUploader() {
         render: error.code,
         type: "error",
         isLoading: false,
-        autoClose: 5003,
+        closeOnClick: true,
       });
       setIsLoading(false);
     }
