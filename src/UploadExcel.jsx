@@ -59,6 +59,14 @@ function ExcelUploader() {
     )}-${String(newDate.getDate()).padStart(2, "0")}`;
   };
 
+  const beautyDate = (value) => {
+    const [date, time] = value[0].split(" ");
+    const [day, month] = date.split("/");
+    const dateTime = `2024-${month}-${day}`;
+
+    return `${dateTime} ${time}`;
+  };
+
   const handleFileChange = (event) => {
     setIsLoading(true);
     const file = event.target.files[0];
@@ -330,6 +338,30 @@ function ExcelUploader() {
       </div>
       <div className="form">
         <div className="title">Generate Log Price</div>
+        {data && data.length > 0 ? (
+          <table style={{ marginTop: 20 }}>
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Total data</th>
+                <th>From</th>
+                <th>To</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((val) => (
+                <tr key={val.symbol}>
+                  <td>{val.symbol}</td>
+                  <td>{val.jsonData.length}</td>
+                  <td>{beautyDate(val.jsonData[val.jsonData.length - 1])}</td>
+                  <td>{beautyDate(val.jsonData[0])}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <></>
+        )}
         <div className="ic2">
           <input id="lastname" type="file" onChange={handleFileChange} />
         </div>
