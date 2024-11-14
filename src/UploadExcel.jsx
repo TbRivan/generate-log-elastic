@@ -225,10 +225,10 @@ function ExcelUploader() {
           closeOnClick: true,
           isLoading: false,
         });
-        setIsLoading(false);
-        setData([]);
       }
     }
+    setIsLoading(false);
+    setData([]);
   };
 
   const handleSubmitChart = async () => {
