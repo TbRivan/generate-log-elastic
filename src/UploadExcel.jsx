@@ -63,6 +63,8 @@ function ExcelUploader() {
     setIsLoading(true);
     const file = event.target.files[0];
     const reader = new FileReader();
+    const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
+    const toastLoading = toast.loading(`Uploading file excel`);
 
     reader.onload = (event) => {
       const workbook = XLSX.read(event.target.result, { type: "binary" });
@@ -77,9 +79,17 @@ function ExcelUploader() {
         jsonData.shift();
         jsonData.splice(-3);
 
-        jsonData = jsonData.filter((row) =>
-          row.some((cell) => cell !== null && cell !== "")
-        );
+        jsonData = jsonData.filter((row) => {
+          if (row[0]) {
+            const [date] = row[0].split(" ");
+            const [day] = date.split("/");
+            if (day.match(regexDay)) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        });
 
         dataProduct.push({ symbol: sheetName, jsonData });
       }
@@ -87,6 +97,13 @@ function ExcelUploader() {
       setData(dataProduct);
       console.log(dataProduct);
       setIsLoading(false);
+      toast.update(toastLoading, {
+        render: "Excel file uploaded successfully and ready for processing.",
+        type: "success",
+        isLoading: false,
+        autoClose: 10003,
+        closeOnClick: true,
+      });
     };
 
     reader.readAsBinaryString(file);
