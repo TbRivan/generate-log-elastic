@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx/xlsx.mjs";
 import axios from "axios";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 function ExcelUploader() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState("");
-  const [from, setFrom] = useState("2024-01-01 00:00:00");
-  const [to, setTo] = useState("2024-01-01 23:59:59");
+  const [dateFrom, setDateFrom] = useState(new Date());
+  const [dateTo, setDateTo] = useState(new Date());
+  const [timeFrom, setTimeFrom] = useState("00:00:00");
+  const [timeTo, setTimeTo] = useState("23:59:59");
   const [symbol, setSymbol] = useState("");
 
   const host = import.meta.env.VITE_API_HOST;
@@ -45,6 +50,14 @@ function ExcelUploader() {
   ];
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const formatDate = (date) => {
+    const newDate = new Date(date);
+    return `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(newDate.getDate()).padStart(2, "0")}`;
+  };
 
   const handleFileChange = (event) => {
     setIsLoading(true);
@@ -204,6 +217,9 @@ function ExcelUploader() {
 
       setIsLoading(true);
 
+      const from = `${formatDate(dateFrom)} ${timeFrom}`;
+      const to = `${formatDate(dateTo)} ${timeTo}`;
+
       let dataRequest = {
         symbol: symbol.toUpperCase(),
         from,
@@ -268,9 +284,6 @@ function ExcelUploader() {
       <div className="form" style={{ marginBottom: 50 }}>
         <h3>{`Running on ${mode} mode`}</h3>
         <h3>{`${apiURL}`}</h3>
-      </div>
-      <div className="form">
-        <div className="title">Generate Log Price</div>
         <div className="input-container ic1">
           <textarea
             className="input"
@@ -282,10 +295,12 @@ function ExcelUploader() {
             }}
           />
         </div>
+      </div>
+      <div className="form">
+        <div className="title">Generate Log Price</div>
         <div className="ic2">
           <input id="lastname" type="file" onChange={handleFileChange} />
         </div>
-
         <button
           type="text"
           onClick={handleSubmitPrice}
@@ -334,23 +349,53 @@ function ExcelUploader() {
             ))}
           </select>
         </div>
-        <div className="input-container-2 ic1">
+        <h3 className="label-input">From</h3>
+        <div className="input-container-3 ic1">
+          {/* <input
+            className="input"
+            type="text"
+            placeholder="Input Date From (YYYY-MM-SS)"
+            value={dateFrom}
+            onChange={(e) => {
+              setFrom(e.target.value);
+            }}
+          /> */}
+          <DatePicker
+            className="input date-input"
+            selected={dateFrom}
+            onChange={(date) => setDateFrom(date)}
+          />
           <input
             className="input"
             type="text"
-            placeholder="Input From (HH:mm:ss)"
-            value={from}
+            placeholder="Input Time From (HH:mm:ss)"
+            value={timeFrom}
             onChange={(e) => {
               setFrom(e.target.value);
             }}
           />
         </div>
-        <div className="input-container-2 ic1">
+        <h3 className="label-input">To</h3>
+        <div className="input-container-3 ic1">
+          {/* <input
+            className="input"
+            type="text"
+            placeholder="Input Date To (YYYY-MM-SS)"
+            value={dateTo}
+            onChange={(e) => {
+              setTo(e.target.value);
+            }}
+          /> */}
+          <DatePicker
+            className="input date-input"
+            selected={dateTo}
+            onChange={(date) => setDateTo(date)}
+          />
           <input
             className="input"
             type="text"
-            placeholder="Input To (HH:mm:ss)"
-            value={to}
+            placeholder="Input Time To (HH:mm:ss)"
+            value={timeTo}
             onChange={(e) => {
               setTo(e.target.value);
             }}
