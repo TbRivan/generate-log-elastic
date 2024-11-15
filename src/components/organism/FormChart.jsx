@@ -7,10 +7,10 @@ import DateInput from "../atom/DateInput";
 import Select from "../atom/Select";
 import TextInput from "../atom/TextInput";
 import { toast } from "react-toastify";
-import axios from "axios";
 import { formatDate } from "../../helper";
+import { generateLogChart } from "../../api/apiService";
 
-function FormChart({ apiURL }) {
+function FormChart() {
   const token = useTokenStore((state) => state.token);
   const isLoading = useLoadingStore((state) => state.isLoading);
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
@@ -56,18 +56,14 @@ function FormChart({ apiURL }) {
       };
 
       while (true) {
-        const { data } = await axios.post(
-          `${apiURL}/etrade/log-chart/price-history`,
-          { ...dataRequest },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const { error, message, data } = await generateLogChart(
+          dataRequest,
+          token
         );
-        if (data.headers.statusCode !== 200) {
+
+        if (error) {
           toast.update(toastLoading, {
-            render: data.headers.message,
+            render: message,
             type: "error",
             isLoading: false,
             closeOnClick: true,
@@ -75,14 +71,14 @@ function FormChart({ apiURL }) {
           setIsLoading(false);
           break;
         } else {
-          if (data.data.nextPrice) {
-            dataRequest.stepPriceLog = data.data.stepPriceLog;
-            dataRequest.totalLoop = data.data.totalLoop;
-            dataRequest.lastDocument = data.data.lastDocument;
-            dataRequest.keyRedis = data.data.keyRedis;
+          if (data.nextPrice) {
+            dataRequest.stepPriceLog = data.stepPriceLog;
+            dataRequest.totalLoop = data.totalLoop;
+            dataRequest.lastDocument = data.lastDocument;
+            dataRequest.keyRedis = data.keyRedis;
 
             const percentage = Math.floor(
-              (data.data.stepPriceLog / data.data.totalLoop) * 100
+              (data.stepPriceLog / data.totalLoop) * 100
             );
             toast.update(toastLoading, {
               render: `Generating Chart ${percentage}%`,
@@ -92,7 +88,7 @@ function FormChart({ apiURL }) {
           } else {
             setIsLoading(false);
             toast.update(toastLoading, {
-              render: `${data.headers.message}, Price Found: ${data.data.priceFound}`,
+              render: `${message}, Price Found: ${data.priceFound}`,
               type: "success",
               isLoading: false,
               closeOnClick: true,

@@ -12,8 +12,8 @@ function GenerateLog() {
   return (
     <>
       <FormToken apiURL={apiURL} mode={config.mode} />
-      <FormPrice apiURL={apiURL} />
-      <FormChart apiURL={apiURL} />
+      <FormPrice />
+      <FormChart />
     </>
   );
 }

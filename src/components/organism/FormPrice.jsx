@@ -6,10 +6,10 @@ import { toast } from "react-toastify";
 import * as XLSX from "xlsx/xlsx.mjs";
 import FileInput from "../atom/FileInput";
 import ButtonSubmit from "../atom/ButtonSubmit";
-import axios from "axios";
 import { symbols } from "../../helper/symbol";
+import { generateLogPrice } from "../../api/apiService";
 
-function FormPrice({ apiURL }) {
+function FormPrice() {
   const isLoading = useLoadingStore((state) => state.isLoading);
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
   const data = usePriceStore((state) => state.price);
@@ -118,23 +118,19 @@ function FormPrice({ apiURL }) {
         const dataRequest = sortedData.slice(start, end);
 
         try {
-          const response = await axios.post(
-            `${apiURL}/etrade/log-price/winquote`,
-            {
-              symbol,
-              priceData: dataRequest,
-              hlprice: { hprice, lprice },
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const request = {
+            symbol,
+            priceData: dataRequest,
+            hlprice: { hprice, lprice },
+          };
+          const { error, message, data } = await generateLogPrice(
+            request,
+            token
           );
 
-          if (response.data.headers.statusCode !== 200) {
+          if (error) {
             toast.update(toastLoading, {
-              render: response.data.headers.message,
+              render: message,
               type: "error",
               isLoading: false,
               closeOnClick: true,
@@ -143,7 +139,6 @@ function FormPrice({ apiURL }) {
             setIsLoading(false);
             break;
           } else {
-            const { data } = response.data;
             hprice = data.hprice;
             lprice = data.lprice;
             isSuccess = true;
