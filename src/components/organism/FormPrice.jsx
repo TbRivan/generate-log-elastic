@@ -8,6 +8,7 @@ import FileInput from "../atom/FileInput";
 import ButtonSubmit from "../atom/ButtonSubmit";
 import axios from "axios";
 import { config } from "../../config";
+import { symbols } from "../../helper/symbol";
 
 function FormPrice() {
   const isLoading = useLoadingStore((state) => state.isLoading);
@@ -35,6 +36,19 @@ function FormPrice() {
 
       for (let i = 0; i < sheetCount; i++) {
         const sheetName = workbook.SheetNames[i];
+
+        const checkSymbol = symbols.find((val) => val.value === sheetName);
+
+        if (!checkSymbol) {
+          toast.update(toastLoading, {
+            render: `Cannot upload Symbol ${sheetName}, please check sheetname`,
+            type: "error",
+            isLoading: false,
+            closeOnClick: true,
+          });
+          return;
+        }
+
         const sheetData = workbook.Sheets[sheetName];
         let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
 
