@@ -4,8 +4,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 
-import "react-datepicker/dist/react-datepicker.css";
-
 function ExcelUploader() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
