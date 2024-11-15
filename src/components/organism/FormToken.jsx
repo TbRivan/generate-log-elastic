@@ -1,8 +1,21 @@
+import { useEffect } from "react";
 import { useTokenStore } from "../../store/tokenStore";
+import ButtonSubmit from "../atom/ButtonSubmit";
 import TextAreaInput from "../atom/TextAreaInput";
+import Cookies from "js-cookie";
 
 function FormToken({ apiURL, mode }) {
-  const { token, setToken } = useTokenStore();
+  const { token, setToken, checkTokenFromCookie } = useTokenStore();
+
+  useEffect(() => {
+    checkTokenFromCookie();
+  }, [checkTokenFromCookie]);
+
+  const handleToken = () => {
+    if (token) {
+      Cookies.set("token", token, { expires: 1 });
+    }
+  };
 
   return (
     <div className="form" style={{ marginBottom: 50 }}>
@@ -15,6 +28,13 @@ function FormToken({ apiURL, mode }) {
           placeholder={"Input Token"}
         />
       </div>
+      <ButtonSubmit
+        onClick={handleToken}
+        style={{ marginTop: 20 }}
+        disabled={token === "" ? true : false}
+      >
+        Set Token
+      </ButtonSubmit>
     </div>
   );
 }
