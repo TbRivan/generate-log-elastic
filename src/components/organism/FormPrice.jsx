@@ -7,20 +7,14 @@ import * as XLSX from "xlsx/xlsx.mjs";
 import FileInput from "../atom/FileInput";
 import ButtonSubmit from "../atom/ButtonSubmit";
 import axios from "axios";
-import { config } from "../../config";
 import { symbols } from "../../helper/symbol";
 
-function FormPrice() {
+function FormPrice({ apiURL }) {
   const isLoading = useLoadingStore((state) => state.isLoading);
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
   const data = usePriceStore((state) => state.price);
   const setData = usePriceStore((state) => state.setPrice);
   const token = useTokenStore((state) => state.token);
-
-  let apiURL = `${config.host}:${config.port}`;
-  if (config.mode === "uat") {
-    apiURL = `${config.host}`;
-  }
 
   const handleFileChange = (event) => {
     setIsLoading(true);

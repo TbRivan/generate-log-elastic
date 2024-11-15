@@ -8,10 +8,9 @@ import Select from "../atom/Select";
 import TextInput from "../atom/TextInput";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { config } from "../../config";
 import { formatDate } from "../../helper";
 
-function FormChart() {
+function FormChart({ apiURL }) {
   const token = useTokenStore((state) => state.token);
   const isLoading = useLoadingStore((state) => state.isLoading);
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
@@ -25,11 +24,6 @@ function FormChart() {
   const setDateTo = useChartStore((state) => state.setDateTo);
   const setTimeFrom = useChartStore((state) => state.setTimeFrom);
   const setTimeTo = useChartStore((state) => state.setTimeTo);
-
-  let apiURL = `${config.host}:${config.port}`;
-  if (config.mode === "uat") {
-    apiURL = `${config.host}`;
-  }
 
   const handleSubmitChart = async () => {
     const toastLoading = toast.loading(
