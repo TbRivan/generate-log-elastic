@@ -63,7 +63,6 @@ function FormPrice() {
       }
 
       setData(dataProduct);
-      console.log(dataProduct);
       setIsLoading(false);
       toast.update(toastLoading, {
         render: "Excel file uploaded successfully and ready for processing.",
