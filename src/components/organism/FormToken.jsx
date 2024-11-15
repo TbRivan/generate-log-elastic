@@ -2,8 +2,7 @@ import { useTokenStore } from "../../store/tokenStore";
 import TextAreaInput from "../atom/TextAreaInput";
 
 function FormToken({ apiURL, mode }) {
-  const token = useTokenStore((state) => state.token);
-  const setToken = useTokenStore((state) => state.setToken);
+  const { token, setToken } = useTokenStore();
 
   return (
     <div className="form" style={{ marginBottom: 50 }}>

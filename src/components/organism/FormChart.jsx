@@ -11,19 +11,20 @@ import { formatDate } from "../../helper";
 import { generateLogChart } from "../../api/apiService";
 
 function FormChart() {
-  const token = useTokenStore((state) => state.token);
-  const isLoading = useLoadingStore((state) => state.isLoading);
-  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
-  const symbol = useChartStore((state) => state.symbol);
-  const dateFrom = useChartStore((state) => state.dateFrom);
-  const dateTo = useChartStore((state) => state.dateTo);
-  const timeFrom = useChartStore((state) => state.timeFrom);
-  const timeTo = useChartStore((state) => state.timeTo);
-  const setSymbol = useChartStore((state) => state.setSymbol);
-  const setDateFrom = useChartStore((state) => state.setDateFrom);
-  const setDateTo = useChartStore((state) => state.setDateTo);
-  const setTimeFrom = useChartStore((state) => state.setTimeFrom);
-  const setTimeTo = useChartStore((state) => state.setTimeTo);
+  const { token } = useTokenStore();
+  const { isLoading, setIsLoading } = useLoadingStore();
+  const {
+    symbol,
+    dateFrom,
+    dateTo,
+    timeFrom,
+    timeTo,
+    setSymbol,
+    setDateFrom,
+    setDateTo,
+    setTimeFrom,
+    setTimeTo,
+  } = useChartStore();
 
   const handleSubmitChart = async () => {
     const toastLoading = toast.loading(

@@ -10,11 +10,9 @@ import { symbols } from "../../helper/symbol";
 import { generateLogPrice } from "../../api/apiService";
 
 function FormPrice() {
-  const isLoading = useLoadingStore((state) => state.isLoading);
-  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
-  const data = usePriceStore((state) => state.price);
-  const setData = usePriceStore((state) => state.setPrice);
-  const token = useTokenStore((state) => state.token);
+  const { isLoading, setIsLoading } = useLoadingStore();
+  const { data, setData } = usePriceStore();
+  const { token } = useTokenStore();
 
   const handleFileChange = (event) => {
     setIsLoading(true);
