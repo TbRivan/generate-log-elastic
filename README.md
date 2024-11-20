@@ -6,21 +6,21 @@ This service used to generate log price and chart to elastic, the price data is 
 
 ## How to run
 
-### 1. Running the service
+### 1. Input Token
+
+Select Environment
 
 ```
-    npm run dev (Running on local development)
+    Development (Running on local development)
 ```
 
 ```
-    npm run dev:lab (Running on lab mode)
+    LAB (Running on lab mode)
 ```
 
 ```
-    npm run dev:uat (Running on uat mode)
+    UAT (Running on uat mode)
 ```
-
-### 2. Input Token
 
 Get token from web admin, copy and paste on field token and click button set token
 
