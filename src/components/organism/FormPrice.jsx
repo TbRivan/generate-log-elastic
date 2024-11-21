@@ -8,6 +8,7 @@ import FileInput from "../atom/FileInput";
 import ButtonSubmit from "../atom/ButtonSubmit";
 import { symbols } from "../../helper/symbol";
 import { generateLogPrice } from "../../api/apiService";
+import HelpTooltip from "../atom/HelpTooltip";
 
 function FormPrice() {
   const { isLoading, setIsLoading } = useLoadingStore();
@@ -174,6 +175,26 @@ function FormPrice() {
 
   return (
     <div className="form">
+      <HelpTooltip>
+        <p>
+          1. Choose file price data with format excel obtained from `winquote`,
+          after uploading file, wait to file to be loaded
+        </p>
+        <p>
+          2. If loaded successfully table on form will appear and please check
+          the value, date from and to within the file
+        </p>
+        <p>
+          3. If the format excel is not in accordance with the desired format,
+          the popup message will appear, please check the file again
+        </p>
+        <p>
+          4. When all the good things ready to generate, click submit button and
+          wait until the web finish generate the log to elastic, after finish
+          generate log price consider checking the price on menu `price-history`
+          in `web admin`
+        </p>
+      </HelpTooltip>
       <div className="title">Generate Log Price</div>
       {data && data.length > 0 ? (
         <table style={{ marginTop: 20 }}>

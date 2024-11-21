@@ -7,6 +7,7 @@ import { useModalStore } from "../../store/modalStore";
 import Modal from "../atom/Modal";
 import { useEnvironmentStore } from "../../store/envStore";
 import Select from "../atom/Select";
+import HelpTooltip from "../atom/HelpTooltip";
 
 export const ENVS = [
   { value: "DEV", label: "Development" },
@@ -52,6 +53,12 @@ function FormToken() {
 
   return (
     <div className="form" style={{ marginBottom: 50 }}>
+      <HelpTooltip>
+        <p>
+          Get token from web admin, copy and paste on field token and click
+          button set token
+        </p>
+      </HelpTooltip>
       {environmentMode ? (
         <>
           <h3>{`Running on ${mode} mode`}</h3>
@@ -61,7 +68,6 @@ function FormToken() {
         <h3>{`Please Select Environment Mode`}</h3>
       )}
       <Select
-        key={"coba"}
         value={environmentMode}
         onChange={handleModalOpen}
         values={ENVS}
@@ -72,7 +78,7 @@ function FormToken() {
           <TextAreaInput
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder={"Input Token"}
+            placeholder={"Input Token Admin"}
           />
         )}
       </div>

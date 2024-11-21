@@ -9,6 +9,7 @@ import TextInput from "../atom/TextInput";
 import { toast } from "react-toastify";
 import { formatDate } from "../../helper";
 import { generateLogChart } from "../../api/apiService";
+import HelpTooltip from "../atom/HelpTooltip";
 
 function FormChart() {
   const { token } = useTokenStore();
@@ -112,6 +113,22 @@ function FormChart() {
 
   return (
     <div className="form" style={{ marginTop: 50 }}>
+      <HelpTooltip>
+        <p>
+          1. Choose symbol want to generate, the table is used to inform symbol
+          open and close time
+        </p>
+        <p>
+          2. Fill up the input field on from and to, the `from` value must less
+          than `to` value, otherwise the service will error
+        </p>
+        <p>
+          3. After filling up the required field, click on submit button and
+          wait until the generate function finish, same as price when the
+          generated log chart is finished check the chart data on menu chart
+          admin or client
+        </p>
+      </HelpTooltip>
       <div className="title" style={{ marginBottom: 20 }}>
         Generate Log Chart from Price History
       </div>
