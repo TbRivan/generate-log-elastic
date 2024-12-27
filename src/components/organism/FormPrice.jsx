@@ -46,7 +46,6 @@ function FormPrice() {
         let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
 
         jsonData.shift();
-        jsonData.splice(-3);
 
         jsonData = jsonData.filter((row) => {
           if (row[0]) {

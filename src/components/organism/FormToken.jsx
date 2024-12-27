@@ -13,6 +13,7 @@ export const ENVS = [
   { value: "DEV", label: "Development" },
   { value: "LAB", label: "LAB" },
   { value: "UAT", label: "UAT" },
+  { value: "DEMO", label: "DEMO" },
 ];
 
 function FormToken() {

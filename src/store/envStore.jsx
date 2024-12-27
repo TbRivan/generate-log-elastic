@@ -21,6 +21,10 @@ export const useEnvironmentStore = create((set) => ({
         env = `UAT`;
         mode = `${config.host_uat}`;
         break;
+      case "DEMO":
+        env = `DEMO`;
+        mode = `${config.host_demo}`;
+        break;
       default:
         env = "";
         mode = "";
