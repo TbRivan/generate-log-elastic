@@ -39,7 +39,7 @@
   box-sizing: border-box;
   height: 55 0px;
   padding: 20px;
-  width: 600px;
+  width: 780px;
   position: relative;
 }
 
@@ -74,7 +74,7 @@
 .input-container-3 {
   height: 50px;
   position: relative;
-  columns: 50px 2;
+  columns: 2;
 }
 
 textarea {
@@ -105,6 +105,7 @@ textarea {
 
 .date-input {
   height: 50px;
+  width: 320px;
 }
 
 .label-input {

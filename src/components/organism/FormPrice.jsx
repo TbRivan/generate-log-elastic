@@ -59,7 +59,12 @@ function FormPrice() {
           }
         });
 
-        dataProduct.push({ symbol: sheetName, jsonData });
+        dataProduct.push({
+          symbol: sheetName,
+          hprice: "",
+          lprice: "",
+          jsonData,
+        });
       }
 
       setData(dataProduct);
@@ -74,6 +79,13 @@ function FormPrice() {
     };
 
     reader.readAsBinaryString(file);
+  };
+
+  const handleInputChange = (symbol, field, value) => {
+    const updatedData = data.map((item) =>
+      item.symbol === symbol ? { ...item, [field]: value } : item
+    );
+    setData(updatedData);
   };
 
   const handleSubmitPrice = async () => {
@@ -101,8 +113,8 @@ function FormPrice() {
         `Process Logging ${data[i].jsonData.length} Price for Symbol ${symbol}`
       );
 
-      let hprice = null;
-      let lprice = null;
+      let hprice = data[i].hprice !== "" ? data[i].hprice : null;
+      let lprice = data[i].lprice !== "" ? data[i].lprice : null;
 
       for (let x = 0; x < countRequest; x++) {
         let start = x * itemPerRequest;
@@ -180,8 +192,10 @@ function FormPrice() {
           after uploading file, wait to file to be loaded
         </p>
         <p>
-          2. If loaded successfully table on form will appear and please check
-          the value, date from and to within the file
+          2. If loaded successfully table on form will appear, after that please
+          check the value, date from and to within the file, to customize high
+          and low price, fill up the input on the table, if the high and low set
+          to empty, the value will get from the excel data
         </p>
         <p>
           3. If the format excel is not in accordance with the desired format,
@@ -199,10 +213,21 @@ function FormPrice() {
         <table style={{ marginTop: 20 }}>
           <thead>
             <tr>
-              <th>Symbol</th>
-              <th>Total data</th>
-              <th>From</th>
-              <th>To</th>
+              <th rowSpan="2">Symbol</th>
+              <th rowSpan="2">Total data</th>
+              <th colSpan="2" style={{ textAlign: "center" }}>
+                Customize
+              </th>
+              <th rowSpan="2" style={{ textAlign: "center" }}>
+                From
+              </th>
+              <th rowSpan="2" style={{ textAlign: "center" }}>
+                To
+              </th>
+            </tr>
+            <tr>
+              <th>High Price</th>
+              <th>Low Price</th>
             </tr>
           </thead>
           <tbody>
@@ -210,6 +235,26 @@ function FormPrice() {
               <tr key={val.symbol}>
                 <td>{val.symbol}</td>
                 <td>{val.jsonData.length}</td>
+                <td>
+                  <input
+                    type="number"
+                    value={val.hprice}
+                    onChange={(e) =>
+                      handleInputChange(val.symbol, "hprice", e.target.value)
+                    }
+                    style={{ width: "70px" }}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    value={val.lprice}
+                    onChange={(e) =>
+                      handleInputChange(val.symbol, "lprice", e.target.value)
+                    }
+                    style={{ width: "70px" }}
+                  />
+                </td>
                 <td>{beautyDate(val.jsonData[val.jsonData.length - 1])}</td>
                 <td>{beautyDate(val.jsonData[0])}</td>
               </tr>

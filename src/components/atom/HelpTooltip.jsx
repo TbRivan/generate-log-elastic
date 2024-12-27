@@ -1,8 +1,8 @@
 function HelpTooltip({ children }) {
   return (
-    <div class="help-icon-container">
-      <span class="help-icon">?</span>
-      <div class="help-popup">{children}</div>
+    <div className="help-icon-container">
+      <span className="help-icon">?</span>
+      <div className="help-popup">{children}</div>
     </div>
   );
 }
