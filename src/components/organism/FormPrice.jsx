@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useLoadingStore } from "../../store/loadingStore";
 import { usePriceStore } from "../../store/priceStore";
 import { useTokenStore } from "../../store/tokenStore";
@@ -14,71 +15,101 @@ function FormPrice() {
   const { isLoading, setIsLoading } = useLoadingStore();
   const { data, setData } = usePriceStore();
   const { token } = useTokenStore();
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
-    setIsLoading(true);
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
-    const toastLoading = toast.loading(`Uploading file excel`);
+    try {
+      setIsLoading(true);
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
+      const toastLoading = toast.loading(`Uploading file excel`);
 
-    reader.onload = (event) => {
-      const workbook = XLSX.read(event.target.result, { type: "binary" });
-      const sheetCount = workbook.SheetNames.length;
-      let dataProduct = [];
+      reader.onload = (event) => {
+        const workbook = XLSX.read(event.target.result, { type: "binary" });
+        const sheetCount = workbook.SheetNames.length;
+        let dataProduct = [];
 
-      for (let i = 0; i < sheetCount; i++) {
-        const sheetName = workbook.SheetNames[i];
+        for (let i = 0; i < sheetCount; i++) {
+          const sheetName = workbook.SheetNames[i];
 
-        const checkSymbol = symbols.find((val) => val.value === sheetName);
+          const checkSymbol = symbols.find((val) => val.value === sheetName);
 
-        if (!checkSymbol) {
-          toast.update(toastLoading, {
-            render: `Cannot upload Symbol ${sheetName}, please check sheetname`,
-            type: "error",
-            isLoading: false,
-            closeOnClick: true,
+          if (!checkSymbol) {
+            toast.update(toastLoading, {
+              render: `Cannot upload Symbol ${sheetName}, please check sheetname`,
+              type: "error",
+              isLoading: false,
+              closeOnClick: true,
+            });
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+            return;
+          }
+
+          const sheetData = workbook.Sheets[sheetName];
+          let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
+
+          if (jsonData.length <= 1) {
+            toast.update(toastLoading, {
+              render: `Failed upload file, please check sheet ${sheetName}`,
+              type: "error",
+              isLoading: false,
+              closeOnClick: true,
+            });
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+            return;
+          }
+
+          jsonData.shift();
+
+          jsonData = jsonData.filter((row) => {
+            if (row[0]) {
+              const [date] = row[0].split(" ");
+              const [day] = date.split("/");
+              if (day.match(regexDay)) {
+                return true;
+              } else {
+                return false;
+              }
+            }
           });
-          return;
+
+          dataProduct.push({
+            symbol: sheetName,
+            hprice: "",
+            lprice: "",
+            jsonData,
+          });
         }
 
-        const sheetData = workbook.Sheets[sheetName];
-        let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
-
-        jsonData.shift();
-
-        jsonData = jsonData.filter((row) => {
-          if (row[0]) {
-            const [date] = row[0].split(" ");
-            const [day] = date.split("/");
-            if (day.match(regexDay)) {
-              return true;
-            } else {
-              return false;
-            }
-          }
+        setData(dataProduct);
+        setIsLoading(false);
+        toast.update(toastLoading, {
+          render: "Excel file uploaded successfully and ready for processing.",
+          type: "success",
+          isLoading: false,
+          autoClose: 10003,
+          closeOnClick: true,
         });
+      };
 
-        dataProduct.push({
-          symbol: sheetName,
-          hprice: "",
-          lprice: "",
-          jsonData,
-        });
-      }
-
-      setData(dataProduct);
-      setIsLoading(false);
+      reader.readAsBinaryString(file);
+    } catch (error) {
       toast.update(toastLoading, {
-        render: "Excel file uploaded successfully and ready for processing.",
-        type: "success",
+        render: `Failed upload excel file, please check the file`,
+        type: "error",
         isLoading: false,
-        autoClose: 10003,
         closeOnClick: true,
       });
-    };
-
-    reader.readAsBinaryString(file);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
   };
 
   const handleInputChange = (symbol, field, value) => {
@@ -265,7 +296,7 @@ function FormPrice() {
         <></>
       )}
       <div className="ic2">
-        <FileInput onChange={handleFileChange} />
+        <FileInput refFile={fileInputRef} onChange={handleFileChange} />
       </div>
       <ButtonSubmit onClick={handleSubmitPrice} disabled={isLoading}>
         {isLoading ? "Loading Data" : "Submit"}

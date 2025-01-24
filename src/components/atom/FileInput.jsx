@@ -1,5 +1,5 @@
-function FileInput({ onChange }) {
-  return <input type="file" onChange={onChange} />;
+function FileInput({ onChange, refFile }) {
+  return <input type="file" ref={refFile} onChange={onChange} />;
 }
 
 export default FileInput;
