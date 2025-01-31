@@ -6,10 +6,10 @@ export const formatDate = (date) => {
   )}-${String(newDate.getDate()).padStart(2, "0")}`;
 };
 
-export const beautyDate = (value) => {
+export const beautyDate = (value, year) => {
   const [date, time] = value[0].split(" ");
   const [day, month] = date.split("/");
-  const dateTime = `2024-${month}-${day}`;
+  const dateTime = `${year}-${month}-${day}`;
 
   return `${dateTime} ${time}`;
 };

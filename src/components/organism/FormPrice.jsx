@@ -11,9 +11,11 @@ import { symbols } from "../../helper/symbol";
 import { generateLogPrice } from "../../api/apiService";
 import HelpTooltip from "../atom/HelpTooltip";
 
+const regexYear = /^(20[0-4][0-9]|2050)$/;
+
 function FormPrice() {
   const { isLoading, setIsLoading } = useLoadingStore();
-  const { data, setData } = usePriceStore();
+  const { data, setData, year, setYear } = usePriceStore();
   const { token } = useTokenStore();
   const fileInputRef = useRef(null);
 
@@ -24,6 +26,23 @@ function FormPrice() {
       const reader = new FileReader();
       const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
       const toastLoading = toast.loading(`Uploading file excel`);
+      const fileName = file.name;
+      const year = fileName.slice(0, 4);
+
+      if (!regexYear.test(year)) {
+        toast.update(toastLoading, {
+          render: `Failed to upload excel file, valid format file YYYYMMDD example: 20240131`,
+          type: "error",
+          isLoading: false,
+          closeOnClick: true,
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
+      setYear(year);
 
       reader.onload = (event) => {
         const workbook = XLSX.read(event.target.result, { type: "binary" });
@@ -162,6 +181,7 @@ function FormPrice() {
             symbol,
             priceData: dataRequest,
             hlprice: { hprice, lprice },
+            year,
           };
           const { error, message, data } = await generateLogPrice(
             request,
@@ -198,6 +218,9 @@ function FormPrice() {
             closeOnClick: true,
           });
           setIsLoading(false);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
           break;
         }
       }
@@ -209,6 +232,9 @@ function FormPrice() {
           closeOnClick: true,
           isLoading: false,
         });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     }
     setIsLoading(false);
@@ -286,8 +312,10 @@ function FormPrice() {
                     style={{ width: "70px" }}
                   />
                 </td>
-                <td>{beautyDate(val.jsonData[val.jsonData.length - 1])}</td>
-                <td>{beautyDate(val.jsonData[0])}</td>
+                <td>
+                  {beautyDate(val.jsonData[val.jsonData.length - 1], year)}
+                </td>
+                <td>{beautyDate(val.jsonData[0], year)}</td>
               </tr>
             ))}
           </tbody>
