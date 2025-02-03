@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import * as XLSX from "xlsx/xlsx.mjs";
 import FileInput from "../atom/FileInput";
 import ButtonSubmit from "../atom/ButtonSubmit";
-import { symbols } from "../../helper/symbol";
+import { SYMBOLS } from "../../helper/symbol";
 import { generateLogPrice } from "../../api/apiService";
 import HelpTooltip from "../atom/HelpTooltip";
 
@@ -51,8 +51,15 @@ function FormPrice() {
 
         for (let i = 0; i < sheetCount; i++) {
           const sheetName = workbook.SheetNames[i];
+          let symbolProduct = "";
 
-          const checkSymbol = symbols.find((val) => val.value === sheetName);
+          let checkSymbol = false;
+          for (const symbol of SYMBOLS) {
+            if (sheetName.includes(symbol.value)) {
+              symbolProduct = symbol.value;
+              checkSymbol = true;
+            }
+          }
 
           if (!checkSymbol) {
             toast.update(toastLoading, {
@@ -98,14 +105,30 @@ function FormPrice() {
           });
 
           dataProduct.push({
-            symbol: sheetName,
+            symbol: symbolProduct,
             hprice: "",
             lprice: "",
             jsonData,
           });
         }
 
-        setData(dataProduct);
+        const groupedData = {};
+
+        dataProduct.forEach((item) => {
+          if (!groupedData[item.symbol]) {
+            groupedData[item.symbol] = {
+              symbol: item.symbol,
+              hprice: item.hprice,
+              lprice: item.lprice,
+              jsonData: [],
+            };
+          }
+          groupedData[item.symbol].jsonData.push(...item.jsonData);
+        });
+
+        const result = Object.values(groupedData);
+
+        setData(result);
         setIsLoading(false);
         toast.update(toastLoading, {
           render: "Excel file uploaded successfully and ready for processing.",
@@ -212,7 +235,7 @@ function FormPrice() {
           }
         } catch (err) {
           toast.update(toastLoading, {
-            render: err.code,
+            render: "Failed import price, please contact administrator",
             type: "error",
             isLoading: false,
             closeOnClick: true,

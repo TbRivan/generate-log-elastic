@@ -1,4 +1,4 @@
-export const symbols = [
+export const SYMBOLS = [
   { value: "HKK", label: "HKK" },
   { value: "JPK", label: "JPK" },
   { value: "XUL", label: "XUL" },
@@ -10,7 +10,7 @@ export const symbols = [
   { value: "USDJPY", label: "USDJPY" },
 ];
 
-export const openCloseSymbol = [
+export const OPEN_CLOSE_SYMBOLS = [
   { symbol: "HKK", open: "08:14", close: "02:05" },
   { symbol: "JPK", open: "06:30", close: "03:47" },
   { symbol: "XUL", open: "06:00", close: "03:34" },

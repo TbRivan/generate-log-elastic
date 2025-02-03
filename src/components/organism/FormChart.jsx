@@ -1,4 +1,4 @@
-import { openCloseSymbol, symbols } from "../../helper/symbol";
+import { OPEN_CLOSE_SYMBOLS, SYMBOLS } from "../../helper/symbol";
 import { useChartStore } from "../../store/chartStore";
 import { useLoadingStore } from "../../store/loadingStore";
 import { useTokenStore } from "../../store/tokenStore";
@@ -28,9 +28,6 @@ function FormChart() {
   } = useChartStore();
 
   const handleSubmitChart = async () => {
-    const toastLoading = toast.loading(
-      `Process Logging Chart for Symbol ${symbol}`
-    );
     try {
       if (!token) {
         toast.error("Token cannot be empty!");
@@ -41,6 +38,10 @@ function FormChart() {
         toast.error("Please select symbol!");
         return;
       }
+
+      const toastLoading = toast.loading(
+        `Process Logging Chart for Symbol ${symbol}`
+      );
 
       setIsLoading(true);
 
@@ -141,7 +142,7 @@ function FormChart() {
           </tr>
         </thead>
         <tbody>
-          {openCloseSymbol.map((val) => (
+          {OPEN_CLOSE_SYMBOLS.map((val) => (
             <tr key={val.symbol}>
               <td>{val.symbol}</td>
               <td>{val.open}</td>
@@ -154,7 +155,7 @@ function FormChart() {
         <Select
           value={symbol}
           onChange={setSymbol}
-          values={symbols}
+          values={SYMBOLS}
           label={"Select Symbol"}
         />
       </div>
