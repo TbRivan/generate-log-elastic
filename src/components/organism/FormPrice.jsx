@@ -12,6 +12,7 @@ import { generateLogPrice } from "../../api/apiService";
 import HelpTooltip from "../atom/HelpTooltip";
 
 const regexYear = /^(20[0-4][0-9]|2050)$/;
+const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
 
 function FormPrice() {
   const { isLoading, setIsLoading } = useLoadingStore();
@@ -24,7 +25,6 @@ function FormPrice() {
       setIsLoading(true);
       const file = event.target.files[0];
       const reader = new FileReader();
-      const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
       const toastLoading = toast.loading(`Uploading file excel`);
       const fileName = file.name;
       const year = fileName.slice(0, 4);
@@ -45,98 +45,115 @@ function FormPrice() {
       setYear(year);
 
       reader.onload = (event) => {
-        const workbook = XLSX.read(event.target.result, { type: "binary" });
-        const sheetCount = workbook.SheetNames.length;
-        let dataProduct = [];
+        try {
+          const workbook = XLSX.read(event.target.result, { type: "binary" });
+          const sheetCount = workbook.SheetNames.length;
+          let dataProduct = [];
 
-        for (let i = 0; i < sheetCount; i++) {
-          const sheetName = workbook.SheetNames[i];
-          let symbolProduct = "";
+          for (let i = 0; i < sheetCount; i++) {
+            const sheetName = workbook.SheetNames[i];
+            let symbolProduct = "";
 
-          let checkSymbol = false;
-          for (const symbol of SYMBOLS) {
-            if (sheetName.includes(symbol.value)) {
-              symbolProduct = symbol.value;
-              checkSymbol = true;
-            }
-          }
-
-          if (!checkSymbol) {
-            toast.update(toastLoading, {
-              render: `Cannot upload Symbol ${sheetName}, please check sheetname`,
-              type: "error",
-              isLoading: false,
-              closeOnClick: true,
-            });
-            if (fileInputRef.current) {
-              fileInputRef.current.value = "";
-            }
-            return;
-          }
-
-          const sheetData = workbook.Sheets[sheetName];
-          let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
-
-          if (jsonData.length <= 1) {
-            toast.update(toastLoading, {
-              render: `Failed upload file, please check sheet ${sheetName}`,
-              type: "error",
-              isLoading: false,
-              closeOnClick: true,
-            });
-            if (fileInputRef.current) {
-              fileInputRef.current.value = "";
-            }
-            return;
-          }
-
-          jsonData.shift();
-
-          jsonData = jsonData.filter((row) => {
-            if (row[0]) {
-              const [date] = row[0].split(" ");
-              const [day] = date.split("/");
-              if (day.match(regexDay)) {
-                return true;
-              } else {
-                return false;
+            let checkSymbol = false;
+            for (const symbol of SYMBOLS) {
+              if (sheetName.includes(symbol.value)) {
+                symbolProduct = symbol.value;
+                checkSymbol = true;
               }
             }
-          });
 
-          dataProduct.push({
-            symbol: symbolProduct,
-            hprice: "",
-            lprice: "",
-            jsonData,
-          });
-        }
+            if (!checkSymbol) {
+              toast.update(toastLoading, {
+                render: `Cannot upload Symbol ${sheetName}, please check sheetname`,
+                type: "error",
+                isLoading: false,
+                closeOnClick: true,
+              });
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+              return;
+            }
 
-        const groupedData = {};
+            const sheetData = workbook.Sheets[sheetName];
+            let jsonData = XLSX.utils.sheet_to_json(sheetData, { header: 1 });
 
-        dataProduct.forEach((item) => {
-          if (!groupedData[item.symbol]) {
-            groupedData[item.symbol] = {
-              symbol: item.symbol,
-              hprice: item.hprice,
-              lprice: item.lprice,
-              jsonData: [],
-            };
+            if (jsonData.length <= 1 || jsonData[0].length < 1) {
+              toast.update(toastLoading, {
+                render: `Failed upload file, please check sheet ${sheetName}`,
+                type: "error",
+                isLoading: false,
+                closeOnClick: true,
+              });
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+              return;
+            }
+
+            jsonData.shift();
+
+            jsonData = jsonData.filter((row) => {
+              if (row[0]) {
+                const [date] = row[0].split(" ");
+                const [day] = date.split("/");
+                if (day.match(regexDay)) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            });
+
+            dataProduct.push({
+              symbol: symbolProduct,
+              hprice: "",
+              lprice: "",
+              jsonData,
+            });
           }
-          groupedData[item.symbol].jsonData.push(...item.jsonData);
-        });
 
-        const result = Object.values(groupedData);
+          const groupedData = {};
 
-        setData(result);
-        setIsLoading(false);
-        toast.update(toastLoading, {
-          render: "Excel file uploaded successfully and ready for processing.",
-          type: "success",
-          isLoading: false,
-          autoClose: 10003,
-          closeOnClick: true,
-        });
+          dataProduct.forEach((item) => {
+            if (!groupedData[item.symbol]) {
+              groupedData[item.symbol] = {
+                symbol: item.symbol,
+                hprice: item.hprice,
+                lprice: item.lprice,
+                jsonData: [],
+              };
+            }
+
+            for (const data of item.jsonData) {
+              groupedData[item.symbol].jsonData.push(data);
+            }
+          });
+
+          const result = Object.values(groupedData);
+
+          setData(result);
+          setIsLoading(false);
+          toast.update(toastLoading, {
+            render:
+              "Excel file uploaded successfully and ready for processing.",
+            type: "success",
+            isLoading: false,
+            autoClose: 10003,
+            closeOnClick: true,
+          });
+        } catch (error) {
+          toast.update(toastLoading, {
+            render: `${error.message}, Please contact administrator`,
+            type: "error",
+            isLoading: false,
+            closeOnClick: true,
+          });
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+          return;
+        }
       };
 
       reader.readAsBinaryString(file);
