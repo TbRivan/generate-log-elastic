@@ -3,6 +3,8 @@ dist
 dist-ssr
 *.local
 
+*.tar
+
 # Logs
 logs
 *.log
