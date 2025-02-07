@@ -10,10 +10,12 @@ import { toast } from "react-toastify";
 import { formatDate } from "../../helper";
 import { generateLogChart } from "../../api/apiService";
 import HelpTooltip from "../atom/HelpTooltip";
+import { useEnvironmentStore } from "../../store/envStore";
 
 function FormChart() {
   const { token } = useTokenStore();
   const { isLoading, setIsLoading } = useLoadingStore();
+  const { doubleEnv, apiURL, mode } = useEnvironmentStore();
   const {
     symbol,
     dateFrom,
@@ -28,87 +30,102 @@ function FormChart() {
   } = useChartStore();
 
   const handleSubmitChart = async () => {
-    try {
-      if (!token) {
-        toast.error("Token cannot be empty!");
-        return;
-      }
+    if (!token) {
+      toast.error("Token cannot be empty!");
+      return;
+    }
 
-      if (!symbol) {
-        toast.error("Please select symbol!");
-        return;
-      }
+    if (!symbol) {
+      toast.error("Please select symbol!");
+      return;
+    }
 
+    const processDataChart = async (url, token, env) => {
       const toastLoading = toast.loading(
-        `Process Logging Chart for Symbol ${symbol}`
+        `[${env}] Process Logging Chart for Symbol ${symbol}`
       );
+      try {
+        setIsLoading(true);
 
-      setIsLoading(true);
+        const from = `${formatDate(dateFrom)} ${timeFrom}`;
+        const to = `${formatDate(dateTo)} ${timeTo}`;
 
-      const from = `${formatDate(dateFrom)} ${timeFrom}`;
-      const to = `${formatDate(dateTo)} ${timeTo}`;
+        let dataRequest = {
+          symbol: symbol.toUpperCase(),
+          from,
+          to,
+          stepPriceLog: null,
+          totalLoop: null,
+          lastDocument: null,
+          keyRedis: null,
+        };
 
-      let dataRequest = {
-        symbol: symbol.toUpperCase(),
-        from,
-        to,
-        stepPriceLog: null,
-        totalLoop: null,
-        lastDocument: null,
-        keyRedis: null,
-      };
+        while (true) {
+          const { error, message, data } = await generateLogChart(
+            dataRequest,
+            url,
+            token
+          );
 
-      while (true) {
-        const { error, message, data } = await generateLogChart(
-          dataRequest,
-          token
-        );
-
-        if (error) {
-          toast.update(toastLoading, {
-            render: message,
-            type: "error",
-            isLoading: false,
-            closeOnClick: true,
-          });
-          setIsLoading(false);
-          break;
-        } else {
-          if (data.nextPrice) {
-            dataRequest.stepPriceLog = data.stepPriceLog;
-            dataRequest.totalLoop = data.totalLoop;
-            dataRequest.lastDocument = data.lastDocument;
-            dataRequest.keyRedis = data.keyRedis;
-
-            const percentage = Math.floor(
-              (data.stepPriceLog / data.totalLoop) * 100
-            );
+          if (error) {
             toast.update(toastLoading, {
-              render: `Generating Chart ${percentage}%`,
-              type: "info",
-              isLoading: true,
-            });
-          } else {
-            setIsLoading(false);
-            toast.update(toastLoading, {
-              render: `${message}, Price Found: ${data.priceFound}`,
-              type: "success",
+              render: message,
+              type: "error",
               isLoading: false,
               closeOnClick: true,
             });
-
+            setIsLoading(false);
             break;
+          } else {
+            if (data.nextPrice) {
+              dataRequest.stepPriceLog = data.stepPriceLog;
+              dataRequest.totalLoop = data.totalLoop;
+              dataRequest.lastDocument = data.lastDocument;
+              dataRequest.keyRedis = data.keyRedis;
+
+              const percentage = Math.floor(
+                (data.stepPriceLog / data.totalLoop) * 100
+              );
+              toast.update(toastLoading, {
+                render: `[${env}]  Generating Chart ${percentage}%`,
+                type: "info",
+                isLoading: true,
+              });
+            } else {
+              setIsLoading(false);
+              toast.update(toastLoading, {
+                render: `[${env}]  ${message}, Price Found: ${data.priceFound}`,
+                type: "success",
+                isLoading: false,
+                closeOnClick: true,
+              });
+
+              break;
+            }
           }
         }
+      } catch (error) {
+        toast.update(toastLoading, {
+          render: `[${env}] ${error.message} Please conctact administrator`,
+          type: "error",
+          isLoading: false,
+          closeOnClick: true,
+        });
+        setIsLoading(false);
       }
-    } catch (error) {
-      toast.update(toastLoading, {
-        render: error.code,
-        type: "error",
-        isLoading: false,
-        closeOnClick: true,
-      });
-      setIsLoading(false);
+    };
+
+    if (doubleEnv) {
+      const splitApiUrl = apiURL.split("|");
+      const splitEnvName = mode.split(" & ");
+
+      await Promise.all(
+        splitApiUrl.map((url, index) =>
+          processDataChart(url, token, splitEnvName[index])
+        )
+      );
+    } else {
+      await processDataChart(apiURL, token, mode);
     }
   };
 

@@ -11,5 +11,8 @@ export const config = {
   host_demo: import.meta.env.VITE_API_HOST_DEMO,
   port_demo: import.meta.env.VITE_API_PORT_DEMO,
 
+  host_live: import.meta.env.VITE_API_HOST_LIVE,
+  port_live: import.meta.env.VITE_API_PORT_LIVE,
+
   mode: import.meta.env.MODE,
 };

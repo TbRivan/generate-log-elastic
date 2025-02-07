@@ -10,6 +10,7 @@ import ButtonSubmit from "../atom/ButtonSubmit";
 import { SYMBOLS } from "../../helper/symbol";
 import { generateLogPrice } from "../../api/apiService";
 import HelpTooltip from "../atom/HelpTooltip";
+import { useEnvironmentStore } from "../../store/envStore";
 
 const regexYear = /^(20[0-4][0-9]|2050)$/;
 const regexDay = /^(0[1-9]|[12][0-9]|3[01])$/;
@@ -18,6 +19,7 @@ function FormPrice() {
   const { isLoading, setIsLoading } = useLoadingStore();
   const { data, setData, year, setYear } = usePriceStore();
   const { token } = useTokenStore();
+  const { doubleEnv, apiURL, mode } = useEnvironmentStore();
   const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
@@ -188,95 +190,115 @@ function FormPrice() {
     }
 
     const countProduct = data.length;
-    let symbol;
-    for (let i = 0; i < countProduct; i++) {
-      setIsLoading(true);
-      symbol = data[i].symbol;
 
-      const totalData = data[i].jsonData.length;
-      const itemPerRequest = 999;
-      const countRequest = Math.ceil(totalData / itemPerRequest);
-      const sortedData = data[i].jsonData.slice().reverse();
-      let isSuccess = false;
+    // Reusable function to process data for a given URL
+    const processDataPrice = async (url, token, env) => {
+      for (let i = 0; i < countProduct; i++) {
+        setIsLoading(true);
+        const symbol = data[i].symbol;
 
-      const toastLoading = toast.loading(
-        `Process Logging ${data[i].jsonData.length} Price for Symbol ${symbol}`
-      );
+        const totalData = data[i].jsonData.length;
+        const itemPerRequest = 999;
+        const countRequest = Math.ceil(totalData / itemPerRequest);
+        const sortedData = data[i].jsonData.slice().reverse();
+        let isSuccess = false;
 
-      let hprice = data[i].hprice !== "" ? data[i].hprice : null;
-      let lprice = data[i].lprice !== "" ? data[i].lprice : null;
+        const toastLoading = toast.loading(
+          `[${env}] Process Logging ${data[i].jsonData.length} Price for Symbol ${symbol}`
+        );
 
-      for (let x = 0; x < countRequest; x++) {
-        let start = x * itemPerRequest;
+        let hprice = data[i].hprice !== "" ? data[i].hprice : null;
+        let lprice = data[i].lprice !== "" ? data[i].lprice : null;
 
-        if (x !== 0) {
-          start = start - 1;
-        }
+        for (let x = 0; x < countRequest; x++) {
+          let start = x * itemPerRequest;
 
-        const end = (x + 1) * itemPerRequest;
-        const dataRequest = sortedData.slice(start, end);
+          if (x !== 0) {
+            start = start - 1;
+          }
 
-        try {
-          const request = {
-            symbol,
-            priceData: dataRequest,
-            hlprice: { hprice, lprice },
-            year,
-          };
-          const { error, message, data } = await generateLogPrice(
-            request,
-            token
-          );
+          const end = (x + 1) * itemPerRequest;
+          const dataRequest = sortedData.slice(start, end);
 
-          if (error) {
+          try {
+            const request = {
+              symbol,
+              priceData: dataRequest,
+              hlprice: { hprice, lprice },
+              year,
+            };
+
+            // Use the appropriate API function based on the URL
+            const { error, message, data } = await generateLogPrice(
+              request,
+              url,
+              token
+            );
+
+            if (error) {
+              toast.update(toastLoading, {
+                render: message,
+                type: "error",
+                isLoading: false,
+                closeOnClick: true,
+              });
+              isSuccess = false;
+              setIsLoading(false);
+              break;
+            } else {
+              hprice = data.hprice;
+              lprice = data.lprice;
+              isSuccess = true;
+
+              const percentage = Math.floor((x / countRequest) * 100);
+              toast.update(toastLoading, {
+                render: `[${env}] Symbol ${symbol} Generating Price ${percentage}%`,
+                type: "info",
+              });
+              await delay(500);
+            }
+          } catch (err) {
             toast.update(toastLoading, {
-              render: message,
+              render: `[${env}] Failed import price, please contact administrator`,
               type: "error",
               isLoading: false,
               closeOnClick: true,
             });
-            isSuccess = false;
             setIsLoading(false);
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
             break;
-          } else {
-            hprice = data.hprice;
-            lprice = data.lprice;
-            isSuccess = true;
-
-            const percentage = Math.floor((x / countRequest) * 100);
-            toast.update(toastLoading, {
-              render: `Symbol ${symbol} Generating Price ${percentage}%`,
-              type: "info",
-            });
-            await delay(500);
           }
-        } catch (err) {
+        }
+
+        if (isSuccess) {
           toast.update(toastLoading, {
-            render: "Failed import price, please contact administrator",
-            type: "error",
-            isLoading: false,
+            render: `[${env}] Success Log price ${symbol} to elastic`,
+            type: "success",
             closeOnClick: true,
+            isLoading: false,
           });
-          setIsLoading(false);
           if (fileInputRef.current) {
             fileInputRef.current.value = "";
           }
-          break;
         }
       }
+    };
 
-      if (isSuccess) {
-        toast.update(toastLoading, {
-          render: `Success Log price ${symbol} to elastic`,
-          type: "success",
-          closeOnClick: true,
-          isLoading: false,
-        });
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      }
+    if (doubleEnv) {
+      const splitApiUrl = apiURL.split("|");
+      const splitEnvName = mode.split(" & ");
+
+      await Promise.all(
+        splitApiUrl.map((url, index) =>
+          processDataPrice(url, token, splitEnvName[index])
+        )
+      );
+    } else {
+      await processDataPrice(apiURL, token, mode);
     }
+
     setIsLoading(false);
     setData([]);
   };

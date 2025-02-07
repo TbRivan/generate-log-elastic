@@ -10,10 +10,13 @@ import Select from "../atom/Select";
 import HelpTooltip from "../atom/HelpTooltip";
 
 export const ENVS = [
-  { value: "DEV", label: "Development" },
-  { value: "LAB", label: "LAB" },
-  { value: "UAT", label: "UAT" },
-  { value: "DEMO", label: "DEMO" },
+  { value: "DEV", label: "1. Development" },
+  { value: "DEVDEV", label: "2. Development & Development" },
+  { value: "LAB", label: "3. LAB" },
+  { value: "UAT", label: "4. UAT" },
+  { value: "DEMO", label: "5. DEMO" },
+  { value: "LIVE", label: "6. LIVE" },
+  { value: "DEMOLIVE", label: "7. DEMO & LIVE" },
 ];
 
 function FormToken() {

@@ -1,11 +1,8 @@
 import { callAPI } from "../config/api";
-import { useEnvironmentStore } from "../store/envStore";
 
-export const generateLogPrice = async (data, token) => {
-  const apiURL = useEnvironmentStore.getState().apiURL;
-
+export const generateLogPrice = async (data, url, token) => {
   const request = {
-    url: `${apiURL}/etrade/log-price/winquote`,
+    url: `${url}/etrade/log-price/winquote`,
     method: "POST",
     data,
     token,
@@ -14,11 +11,9 @@ export const generateLogPrice = async (data, token) => {
   return response;
 };
 
-export const generateLogChart = async (data, token) => {
-  const apiURL = useEnvironmentStore.getState().apiURL;
-
+export const generateLogChart = async (data, url, token) => {
   const request = {
-    url: `${apiURL}/etrade/log-chart/price-history`,
+    url: `${url}/etrade/log-chart/price-history`,
     method: "POST",
     data,
     token,
